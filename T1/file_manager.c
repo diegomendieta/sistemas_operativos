@@ -4,7 +4,7 @@
 #include <stdlib.h> // malloc, calloc, free, etc.
 
 // Import the header file of this module
-#include "manager.h"
+#include "file_manager.h"
 
 /*
 * Splits a string "str" by a separator "sep", returns an array with The
