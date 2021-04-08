@@ -19,28 +19,20 @@ int main(int argc, char** argv){
     char** start_line = file -> lines[process];
     char* id = start_line[0];
 
-    int cmp = strcmp(id, "W");
+    int cmp;
+
+    // 0 si id == "W", 1 si no.
+    cmp = strcmp(id, "W");
 
     // Si es Worker.
-    // linea: id,exec,n,arg_1,...,arg_n
     if (cmp == 0){
-        printf("Executing Worker process...\n");
-        execWorker(start_line);
+        execWorker(file, process);
     }
-
-    /*
-    // linea: id,timeout,n,linea_1,...,linea_n
-    // Si es Manager Root.
-    else if (id == "R"){
-        execManagerRoot();
-    }
-
-    // Si es Manager No Root.
+    
+    // Si es Manager.
     else {
-        // id == "M"
-        execManagerNotRoot();
+        execManager(file, process);
     }
-    */
 
     input_file_destroy(file);
     return 0;
