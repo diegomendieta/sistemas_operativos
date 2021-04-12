@@ -48,7 +48,7 @@ LIB=$(GTK) $(MTH)
 COMMON= file_manager
 
 # Directorios que serán compilados a un programa
-PROGRAMS= mlfq
+PROGRAMS= mlfq file_manager
 
 # Todos los directorios que contienen archivos de código
 SRCDIR=$(COMMON) $(PROGRAMS)

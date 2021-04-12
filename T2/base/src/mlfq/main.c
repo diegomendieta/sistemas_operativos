@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
+#include "queue.h"
 
 
 /* Revisa que los parametros del programa sean válidos */
@@ -40,9 +41,69 @@ int main(int argc, char **argv)
   int n_processes;
   fscanf(input_file, "%d", &n_processes);
 
-  while (n_processes)
+  int n_queues = atoi(argv[3]);
+
+  int program_input = atoi(argv[4]);
+
+  int program_time = 0;
+  int program_time_s = atoi(argv[5]);
+
+  Queue** system_queues = calloc(n_queues, sizeof(Queue*));
+  Process** system_processes = calloc(n_processes, sizeof(Process*));
+
+  for (int i = 0; i < n_queues; i++)
   {
-    
+    Queue* queue = queue_init(n_queues, program_input, i);
+    system_queues[i] = queue;
+  }
+
+  for (int i = 0; i < n_processes; i++)
+  {
+    char nombre_proceso[32];
+    int pid;
+    int tiempo_inicio;
+    int cycles;
+    int wait;
+    int waiting_delay;
+
+    fscanf(input_file, "%d", &nombre_proceso);
+    fscanf(input_file, "%d", &pid);
+    fscanf(input_file, "%d", &tiempo_inicio);
+    fscanf(input_file, "%d", &cycles);
+    fscanf(input_file, "%d", &wait);
+    fscanf(input_file, "%d", &waiting_delay);
+
+    Process* process = process_init(pid, nombre_proceso, tiempo_inicio, cycles, wait, waiting_delay);
+    system_processes[i] = process;
+  }
+
+  while (program_time < program_time_s)
+  {
+    Queue* queue;
+    for (int id_q = 0; id_q < n_queues; id_q++)
+    {
+      if (system_queues[id_q] -> priority == 0)
+      {
+        queue = system_queues[id_q];
+      }
+    }
+    Process* process;
+    for (int id_p = 0; id_p < n_processes; id_p++)
+    {
+      if (system_processes[id_p] -> tiempo_inicio == program_time)
+      {
+        process = system_processes[id_p];
+        add_process(queue, process);
+      }
+    }
+    for (int id_q = 0; id_q < n_queues; id_q++)
+    {
+      if (system_queues[id_q] -> head != NULL && system_queues[id_q] -> tail != NULL)
+      {
+        queue = system_queues[id_q];
+      }
+    }
+    int return_value = execute_next_process(queue);
   }
 
 }
