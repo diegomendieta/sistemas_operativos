@@ -31,11 +31,13 @@ void execWorker(InputFile* file, int process){
     // printf("Exec: %s\n", to_exec);
     // printf("n: %d\n", n);
 
-    pid_t pid = fork();
+    pid_t pid, own_pid;
+    pid = fork();
+    own_pid = getpid();
 
     // Proceso padre.
     if (pid > 0){
-        printf("Ejecutando el proceso padre[%d]...\n", pid);
+        printf("Ejecutando el proceso padre[%d]...\n", own_pid);
         wait(&status);
         printf("Código de salida del proceso hijo: %d\n", WEXITSTATUS(status));
 
@@ -43,17 +45,21 @@ void execWorker(InputFile* file, int process){
         Falta generar output.
         */
         
-        printf("Cerrando el proceso padre[%d].\n", pid);
+        printf("Cerrando el proceso padre[%d].\n", own_pid);
         exit(0);
     }
 
     // Proceso hijo.
     else if (pid == 0){
-        printf("Ejecutando el proceso hijo...\n");
+        pid_t parent_pid = getppid();
+        printf("Ejecutando el proceso hijo[%d] con padre[%d]...\n",
+                own_pid, parent_pid);
         printf("Archivo: %s\n", args[0]);
         execvp(args[0], args);
+        
+        // Agregamos print para chequear si hay errores.
         printf("ESTA LÍNEA NO DEBERÍA MOSTRARSE.\n");
-        exit(0);
+        exit(1);
     }
 }
 
@@ -87,21 +93,27 @@ void execManager(InputFile* file, int process){
     }
 
     int status;
-    pid_t pid;
+    pid_t pid, own_pid;
     for (i = 0; i < n; i++){
         char** child_line = file -> lines[child_idxs[i]];
+
         pid = fork();
+        own_pid = getpid();
 
         // Si es padre.
         if (pid > 0){
-            printf("Ejecutando el proceso padre[%d]...\n", pid);
+            printf("Ejecutando el proceso padre[%d]...\n", own_pid);
             wait(&status);
-            printf("Cerrando el proceso padre[%d].\n", pid);
+            printf("Cerrando el proceso padre[%d].\n", own_pid);
             exit(0);
         }
 
         // Si es hijo.
         else if (pid == 0){
+            pid_t parent_pid = getppid();
+            printf("Ejecutando el proceso hijo[%d] con padre[%d]...\n",
+                    own_pid, parent_pid);
+
             id = child_line[0];
             cmp = strcmp(id, "W");
 
@@ -112,7 +124,7 @@ void execManager(InputFile* file, int process){
 
             // Si es un proceso Manager.
             else {
-                execWorker(file, child_idxs[i]);
+                execManager(file, child_idxs[i]);
             }
         }
     }
