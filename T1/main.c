@@ -35,5 +35,6 @@ int main(int argc, char** argv){
     }
 
     input_file_destroy(file);
+    // printf("\n");
     return 0;
 }
