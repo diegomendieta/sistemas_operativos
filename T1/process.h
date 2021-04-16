@@ -11,5 +11,11 @@ void execWorker(InputFile* file, int process);
 // a ejecutar.
 void execManager(InputFile* file, int process);
 
+// Construye un archivo de output un Worker.
+void buildWorkerOutput(int process, char* name, char** args, int n_args,
+                       int exec_time, int return_code, int interrupted);
+
+void buildManagerOutput();
+
 // Variable global
 pid_t pid_to_kill;

@@ -5,13 +5,39 @@
 #include <sys/wait.h>
 #include <sys/time.h>      // getitimer
 #include <unistd.h>
-
 #include <time.h>
 
 #include "process.h"
 
 // Variable global
 pid_t pid_to_kill;
+
+// Construye un archivo de output un Worker.
+void buildWorkerOutput(int idx, char* name, char** args, int n_args,
+                       int exec_time, int return_code, int interrupted){
+    printf("Entrando a función buildWorkerOutput...\n");
+
+    char path[10];
+    sprintf(path, "%d", idx);
+    char* extension = ".txt";
+    strcat(path, extension);
+
+    FILE* file = fopen(path, "w");
+    fprintf(file, "%s,", name);
+    for (int j = 1; j <= n_args; j++){
+        fprintf(file, "%s,", args[j]);
+    }
+    fprintf(file, "%d,", exec_time);
+    fprintf(file, "%d,", return_code);
+    fprintf(file, "%d", interrupted);
+    fclose(file);
+
+    printf("Saliendo de función buildWorkerOutput...\n\n");
+}
+
+// Construye un archivo de output de un Manager.
+void buildManagerOutput(){
+}
 
 // Ejecuta un proceso de tipo Worker. Recibe un archivo y el índice del proceso
 // a ejecutar.
@@ -79,7 +105,10 @@ void execWorker(InputFile* file, int process){
         printf("Interrupted: %d\n", interrupted);
         printf("---------\n");
 
-        // Falta generar txt
+        // Generamos archivo de output.
+        buildWorkerOutput(
+            process, to_exec, args, n, exec_time, return_code, interrupted
+        );
         
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
         exit(0);
@@ -174,12 +203,4 @@ void execManager(InputFile* file, int process){
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
         exit(0);
     }
-}
-
-// Construye un archivo de output un Worker.
-void buildWorkerOutput(){
-}
-
-// Construye un archivo de output de un Manager.
-void buildManagerOutput(){
 }
