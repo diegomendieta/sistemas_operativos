@@ -3,48 +3,83 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>      // getitimer
 #include <unistd.h>
+
+#include <time.h>
 
 #include "process.h"
 
+// Variable global
+pid_t pid_to_kill;
 
 // Ejecuta un proceso de tipo Worker. Recibe un archivo y el índice del proceso
 // a ejecutar.
 void execWorker(InputFile* file, int process){
-    printf("\n[%d] Ejecutando proceso Worker...\n", process);
-    char** line = file -> lines[process];
-    // linea: id,exec,n,arg_1,...,arg_n
+    
+    // Indicamos cómo manejar las señales SIGINT y SIGABRT.
+    // En el caso de SIGINT, la ignoramos.
+    signal(SIGINT, SIG_IGN);
+    // En el caso de SIGABRT, aplicamos la función signal_handler.
+    signal(SIGABRT, signal_handler);
 
+    printf("\n[%d] Ejecutando proceso Worker...\n", process);
+
+    // linea: id,exec,n,arg_1,...,arg_n
+    char** line = file -> lines[process];
+    
     char* to_exec = line[1];
     const int n = atoi(line[2]);
 
-    int status;
+    int status, return_code, interrupted;
 
     char* args[n+2];
     args[0] = to_exec;
     for (int counter = 1; counter <= n; counter++){
         args[counter] = line[3 + (counter - 1)];
-        // printf("arg[%d]: %s\n", counter, args[counter]);
     }
     args[n+1] = NULL;
-
-    // printf("Exec: %s\n", to_exec);
-    // printf("n: %d\n", n);
 
     pid_t pid, own_pid;
     pid = fork();
     own_pid = getpid();
 
+    time_t start, exec_time;
+    start = time(NULL);
+
     // Proceso padre.
     if (pid > 0){
+        pid_to_kill = pid;
+
         printf("Ejecutando el proceso padre[%d]...\n", own_pid);
         wait(&status);
-        printf("Código de salida del proceso hijo[%d]: %d\n",
-                pid, WEXITSTATUS(status));
 
         /*
-        Falta generar output.
+        ESTADÍSTICAS
         */
+        // name: to_exec
+        // args: args[1:n+1]
+        exec_time = time(NULL) - start;
+        return_code = WEXITSTATUS(status);
+        interrupted = !WIFEXITED(status);
+
+        printf("---------\n");
+        printf("[%d] Stats: \n", pid);
+        printf("Name: %s\n", to_exec);
+
+        printf("Args: ");
+        for (int i = 1; i < n+1; i++){
+            printf("%s", args[i]);
+            if (i < n) printf(",");
+        }
+        printf("\n");
+
+        printf("Execution time: %ld\n", exec_time);
+        printf("Return code: %d\n", return_code);
+        printf("Interrupted: %d\n", interrupted);
+        printf("---------\n");
+
+        // Falta generar txt
         
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
         exit(0);
@@ -68,9 +103,9 @@ void execWorker(InputFile* file, int process){
 // a ejecutar.
 void execManager(InputFile* file, int process){
     
-    char** line = file -> lines[process];
     // linea: id,timeout,n,linea_1,...,linea_n
-
+    char** line = file -> lines[process];
+    
     char* id = line[0];
 
     int timeout, cmp, root;
@@ -139,4 +174,12 @@ void execManager(InputFile* file, int process){
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
         exit(0);
     }
+}
+
+// Construye un archivo de output un Worker.
+void buildWorkerOutput(){
+}
+
+// Construye un archivo de output de un Manager.
+void buildManagerOutput(){
 }
