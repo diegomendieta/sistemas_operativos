@@ -34,6 +34,7 @@ int main(int argc, char** argv){
         execManager(file, process);
     }
 
+    printf("Destroying file...\n");
     input_file_destroy(file);
     return 0;
 }
