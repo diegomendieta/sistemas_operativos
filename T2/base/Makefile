@@ -8,10 +8,8 @@
 
 # El compilador a usar: Gnu C Compiler, Standard 2011 with GNU extensions
 CC=gcc -std=gnu11
-
 # La carpeta donde va todo el código
 SRC=src
-
 # La carpeta donde van todos los archivos de objeto
 OBJ=obj
 
@@ -45,10 +43,10 @@ LIB=$(GTK) $(MTH)
 ###############################################################################
 
 # Directorios con elementos de uso común
-COMMON= file_manager
+COMMON=file_manager
 
 # Directorios que serán compilados a un programa
-PROGRAMS= mlfq file_manager
+PROGRAMS=mlfq
 
 # Todos los directorios que contienen archivos de código
 SRCDIR=$(COMMON) $(PROGRAMS)

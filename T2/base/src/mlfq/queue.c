@@ -13,6 +13,7 @@ Queue* queue_init(int system_queues, int program_input, int priority)
     queue -> quantum = (queue -> system_queues - queue -> priority) * queue -> program_input;
     queue -> head = NULL;
     queue -> tail = NULL;
+    return queue;
 }
 
 void add_process(Queue* queue, Process* process)
@@ -27,6 +28,8 @@ void add_process(Queue* queue, Process* process)
         process -> prev = queue -> tail;
         queue -> tail -> next = process;
     }
+    process -> cycles_for_wait = 0;
+    process -> cycles_waiting = 0;
     process -> next = NULL;
     process -> quantum = queue -> quantum;
     process -> priority = queue -> priority;
@@ -35,23 +38,55 @@ void add_process(Queue* queue, Process* process)
 
 int execute_next_process(Queue* queue)
 {
+    printf("\nqueue -> priority: %i", queue -> priority);
     execute_process(queue -> head);
-    if (queue -> head -> time_running == queue -> head -> wait)
+    Process* head_process = queue -> head;
+    if (head_process -> state == 3)
     {
-        queue -> head = queue -> head -> next;
-        queue -> head -> prev = NULL;
-        return 2;
-    }
-    else if (queue -> head -> quantum == 0)
-    {
-        queue -> head = queue -> head -> next;
-        queue -> head -> prev = NULL;
-        return 1;
-    }
-    else if (queue -> head -> cycles == 0)
-    {
-        queue -> head = queue -> head -> next;
-        queue -> head -> prev = NULL;
+        queue -> head = head_process -> next;
+        if (queue -> head != NULL)
+        {
+            queue -> head -> prev = NULL;
+        }
+        else
+        {
+            queue -> tail = NULL;
+        }
         return 3;
     }
+    else if (head_process -> state == 2)
+    {
+        queue -> head = head_process -> next;
+        if (queue -> head != NULL)
+        {
+            queue -> head -> prev = NULL;
+        }
+        else
+        {
+            queue -> tail = NULL;
+        }
+        return 2;
+    }
+    else if (head_process -> state == 1)
+    {
+        queue -> head = head_process -> next;
+        if (queue -> head != NULL)
+        {
+            queue -> head -> prev = NULL;
+        }
+        else
+        {
+            queue -> tail = NULL;
+        }
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void queue_destroy(Queue* queue)
+{
+    free(queue);
 }
