@@ -22,9 +22,13 @@ void buildWorkerOutput(int idx, char* name, char** args, int n_args,
     char* extension = ".txt";
     strcat(path, extension);
 
+    int len;
+
     FILE* file = fopen(path, "w");
     fprintf(file, "%s,", name);
     for (int j = 1; j <= n_args; j++){
+        len = strlen(args[j]);
+        if (len > 0 && args[j][len-1] == '\n') args[j][len - 1] = '\0';
         fprintf(file, "%s,", args[j]);
     }
     fprintf(file, "%d,", exec_time);
@@ -36,7 +40,41 @@ void buildWorkerOutput(int idx, char* name, char** args, int n_args,
 }
 
 // Construye un archivo de output de un Manager.
-void buildManagerOutput(){
+void buildManagerOutput(int process_id, int* child_idxs, int n){
+    printf("Entrando a función buildManagerOutput...\n");
+
+    FILE* to_file;
+    FILE* from_file;
+    char* extension = ".txt";
+
+    char from_path[11];
+    char buffer[BUFFER_SIZE];
+
+    char to_path[11];
+    sprintf(to_path, "%d", process_id);
+    strcat(to_path, extension);
+    
+    to_file = fopen(to_path, "w");
+    for (int i = 0; i < n; i++){
+        sprintf(from_path, "%d", child_idxs[i]);
+        strcat(from_path, extension);
+
+        printf("from_path: %s\n", from_path);
+
+        int len;
+        from_file = fopen(from_path, "r");
+        while (fgets(buffer, BUFFER_SIZE, from_file)){
+            len = strlen(buffer);
+            if (len > 0 && buffer[len-1] == '\n'){
+                buffer[len - 1] = '\0';
+            }
+            fprintf(to_file, "%s\n", buffer);
+        }
+        fclose(from_file);
+    }
+    fclose(to_file);
+
+    printf("Saliendo de función buildManagerOutput...\n\n");
 }
 
 // Ejecuta un proceso de tipo Worker. Recibe un archivo y el índice del proceso
@@ -89,22 +127,6 @@ void execWorker(InputFile* file, int process){
         return_code = WEXITSTATUS(status);
         interrupted = !WIFEXITED(status);
 
-        printf("---------\n");
-        printf("[%d] Stats: \n", pid);
-        printf("Name: %s\n", to_exec);
-
-        printf("Args: ");
-        for (int i = 1; i < n+1; i++){
-            printf("%s", args[i]);
-            if (i < n) printf(",");
-        }
-        printf("\n");
-
-        printf("Execution time: %ld\n", exec_time);
-        printf("Return code: %d\n", return_code);
-        printf("Interrupted: %d\n", interrupted);
-        printf("---------\n");
-
         // Generamos archivo de output.
         buildWorkerOutput(
             process, to_exec, args, n, exec_time, return_code, interrupted
@@ -134,7 +156,6 @@ void execManager(InputFile* file, int process){
     
     // linea: id,timeout,n,linea_1,...,linea_n
     char** line = file -> lines[process];
-    
     char* id = line[0];
 
     int timeout, cmp, root;
@@ -200,6 +221,8 @@ void execManager(InputFile* file, int process){
     }
 
     if (p > 0) {
+        // Creamos el archivo de output.
+        buildManagerOutput(process, child_idxs, n);
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
         exit(0);
     }

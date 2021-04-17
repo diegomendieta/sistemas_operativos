@@ -15,7 +15,7 @@ void execManager(InputFile* file, int process);
 void buildWorkerOutput(int process, char* name, char** args, int n_args,
                        int exec_time, int return_code, int interrupted);
 
-void buildManagerOutput();
+// void buildManagerOutput();
 
 // Variable global
 pid_t pid_to_kill;
