@@ -2,6 +2,7 @@
 
 #include "file_manager.h"
 #include "signal_handler.h"
+#include "utilities.h"
 
 // Ejecuta un proceso de tipo Worker. Recibe un archivo y el índice del proceso
 // a ejecutar.

@@ -27,8 +27,6 @@ void buildWorkerOutput(int idx, char* name, char** args, int n_args,
     FILE* file = fopen(path, "w");
     fprintf(file, "%s,", name);
     for (int j = 1; j <= n_args; j++){
-        len = strlen(args[j]);
-        if (len > 0 && args[j][len-1] == '\n') args[j][len - 1] = '\0';
         fprintf(file, "%s,", args[j]);
     }
     fprintf(file, "%d,", exec_time);
@@ -61,16 +59,26 @@ void buildManagerOutput(int process_id, int* child_idxs, int n){
 
         printf("from_path: %s\n", from_path);
 
-        int len;
         from_file = fopen(from_path, "r");
-        while (fgets(buffer, BUFFER_SIZE, from_file)){
-            len = strlen(buffer);
-            if (len > 0 && buffer[len-1] == '\n'){
-                buffer[len - 1] = '\0';
+        char* x;
+        int first = 1;
+        while (1){           
+            x = fgets(buffer, BUFFER_SIZE, from_file);
+            if (x == NULL) break;
+
+            /*
+            if (first){
+                first = 0;
+            } else {
+                fprintf(to_file, "\n");
             }
-            fprintf(to_file, "%s\n", buffer);
+            */
+
+            fprintf(to_file, "%s", buffer);
         }
         fclose(from_file);
+
+        if (i != n-1) fprintf(to_file, "\n");
     }
     fclose(to_file);
 
@@ -99,10 +107,14 @@ void execWorker(InputFile* file, int process){
 
     char* args[n+2];
     args[0] = to_exec;
+    printf("\n...\n");
     for (int counter = 1; counter <= n; counter++){
+        line[3 + (counter - 1)] = right_strip(line[3 + (counter - 1)]);
+        printf("%s\n", line[3 + (counter - 1)]);
         args[counter] = line[3 + (counter - 1)];
     }
     args[n+1] = NULL;
+    printf("...\n");
 
     pid_t pid, own_pid;
     pid = fork();
