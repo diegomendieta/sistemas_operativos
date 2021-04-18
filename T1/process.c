@@ -60,20 +60,7 @@ void buildManagerOutput(int process_id, int* child_idxs, int n){
         printf("from_path: %s\n", from_path);
 
         from_file = fopen(from_path, "r");
-        char* x;
-        int first = 1;
-        while (1){           
-            x = fgets(buffer, BUFFER_SIZE, from_file);
-            if (x == NULL) break;
-
-            /*
-            if (first){
-                first = 0;
-            } else {
-                fprintf(to_file, "\n");
-            }
-            */
-
+        while (fgets(buffer, BUFFER_SIZE, from_file)){           
             fprintf(to_file, "%s", buffer);
         }
         fclose(from_file);
