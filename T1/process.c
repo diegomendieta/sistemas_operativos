@@ -1,18 +1,15 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/time.h>      // getitimer
-#include <unistd.h>
-#include <time.h>
-
 #include "process.h"
 
-// Variable global
+// Variable global que indica qué proceso debe matar un Worker (su hijo).
 pid_t pid_to_kill;
 
-// Construye un archivo de output un Worker.
+// Variable global que indica qué procesos debe matar un Manager (sus hijos).
+pid_t* pid_array_to_kill;
+
+// Variable global que indica el número de hijos que tiene un Manager.
+int n_childs;
+
+// Construye el archivo de output de un Worker.
 void buildWorkerOutput(int idx, char* name, char** args, int n_args,
                        int exec_time, int return_code, int interrupted){
     printf("Entrando a función buildWorkerOutput...\n");
@@ -37,7 +34,7 @@ void buildWorkerOutput(int idx, char* name, char** args, int n_args,
     printf("Saliendo de función buildWorkerOutput...\n\n");
 }
 
-// Construye un archivo de output de un Manager.
+// Construye el archivo de output de un Manager.
 void buildManagerOutput(int process_id, int* child_idxs, int n){
     printf("Entrando a función buildManagerOutput...\n");
 
@@ -57,7 +54,7 @@ void buildManagerOutput(int process_id, int* child_idxs, int n){
         sprintf(from_path, "%d", child_idxs[i]);
         strcat(from_path, extension);
 
-        printf("from_path: %s\n", from_path);
+        // printf("from_path: %s\n", from_path);
 
         from_file = fopen(from_path, "r");
         while (fgets(buffer, BUFFER_SIZE, from_file)){           
@@ -75,12 +72,9 @@ void buildManagerOutput(int process_id, int* child_idxs, int n){
 // Ejecuta un proceso de tipo Worker. Recibe un archivo y el índice del proceso
 // a ejecutar.
 void execWorker(InputFile* file, int process){
-    
-    // Indicamos cómo manejar las señales SIGINT y SIGABRT.
-    // En el caso de SIGINT, la ignoramos.
-    signal(SIGINT, SIG_IGN);
-    // En el caso de SIGABRT, aplicamos la función signal_handler.
-    signal(SIGABRT, signal_handler);
+
+    // Seteamos el manejo de señales.
+    setWorkerSignalHandling();
 
     printf("\n[%d] Ejecutando proceso Worker...\n", process);
 
@@ -94,21 +88,18 @@ void execWorker(InputFile* file, int process){
 
     char* args[n+2];
     args[0] = to_exec;
-    printf("\n...\n");
     for (int counter = 1; counter <= n; counter++){
-        line[3 + (counter - 1)] = right_strip(line[3 + (counter - 1)]);
-        printf("%s\n", line[3 + (counter - 1)]);
+        line[3 + (counter - 1)] = rightStrip(line[3 + (counter - 1)]);
         args[counter] = line[3 + (counter - 1)];
+        // printf("%s\n", line[3 + (counter - 1)]);
     }
     args[n+1] = NULL;
-    printf("...\n");
 
     pid_t pid, own_pid;
     pid = fork();
     own_pid = getpid();
 
-    time_t start, exec_time;
-    start = time(NULL);
+    time_t start = time(NULL);
 
     // Proceso padre.
     if (pid > 0){
@@ -122,7 +113,7 @@ void execWorker(InputFile* file, int process){
         */
         // name: to_exec
         // args: args[1:n+1]
-        exec_time = time(NULL) - start;
+        time_t exec_time = time(NULL) - start;
         return_code = WEXITSTATUS(status);
         interrupted = !WIFEXITED(status);
 
@@ -152,18 +143,30 @@ void execWorker(InputFile* file, int process){
 // Ejecuta un proceso de tipo Manager. Recibe un archivo y el índice del proceso
 // a ejecutar.
 void execManager(InputFile* file, int process){
-    
+
     // linea: id,timeout,n,linea_1,...,linea_n
     char** line = file -> lines[process];
     char* id = line[0];
 
-    int timeout, cmp, root;
-
-    timeout = atoi(line[1]);
-    const int n = atoi(line[2]);
+    int cmp, root;
 
     cmp = strcmp(id, "R");
     root = !cmp;
+
+    setManagerSignalHandling(root);
+
+    int timeout = atoi(line[1]);
+
+    // Seteamos el tiempo de timeout. Cuando este se cumpla, se envían una señal
+    // SIGALRM al proceso.
+    alarm(timeout);
+
+    const int n = atoi(line[2]);
+
+    // Seteamos la variable global del número de hijos.
+    n_childs = n;
+
+    pid_array_to_kill = malloc(sizeof(pid_t) * n);
 
     printf("\n[%d] Ejecutando proceso Manager ", process);
     if (!root) printf("No ");
@@ -196,6 +199,8 @@ void execManager(InputFile* file, int process){
 
         // Si el proceso es padre, setear que espere al hijo y continuar.
         if (p > 0) {
+            pid_array_to_kill[i] = p;
+            
             printf("Seteando espera del padre[%d] al hijo[%d]\n", own_pid, p);
             waitpid(p, &status[i], 0);
             continue;

@@ -5,10 +5,7 @@
 #include <sys/wait.h>
 #include "main.h"
 
-#define false 0
-#define true 1
-
-/* Main */
+/* Main. Echa a andar un crtree. */
 int main(int argc, char** argv){
 
     char* input = argv[1];
@@ -19,15 +16,13 @@ int main(int argc, char** argv){
     char** start_line = file -> lines[process];
     char* id = start_line[0];
 
-    int cmp;
-
     // 0 si id == "W", 1 si no.
-    cmp = strcmp(id, "W");
+    int cmp = strcmp(id, "W");
 
     pid_t pid = fork();
 
     if (pid < 0){
-        printf("Error ocurred when forking.")
+        printf("Error ocurred when forking.");
         return 1;
     }
 
