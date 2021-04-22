@@ -1,0 +1,10 @@
+9
+R,100,3,1,2,3
+M,100,3,3,4,5
+M,100,3,6,7,8
+W,./test_files/binarios/hello_world,0
+W,./test_files/binarios/sum,3,10,20,50
+W,./test_files/binarios/goodbye_world,0
+W,./test_files/binarios/hello_world,0
+W,./test_files/binarios/subtract,2,100,14
+W,./test_files/binarios/goodbye_world,0
