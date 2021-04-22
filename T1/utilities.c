@@ -1,6 +1,4 @@
 #include "utilities.h"
-#include <string.h>
-#include <ctype.h>
 
 // https://stackoverflow.com/questions/656542/trim-a-string-in-c
 char* rightStrip(char *s){

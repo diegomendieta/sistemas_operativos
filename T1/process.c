@@ -7,7 +7,7 @@ pid_t pid_to_kill;
 pid_t* pid_array_to_kill;
 
 // Variable global que indica el número de hijos que tiene un Manager.
-int n_childs;
+int n_children;
 
 // Construye el archivo de output de un Worker.
 void buildWorkerOutput(int idx, char* name, char** args, int n_args,
@@ -103,9 +103,11 @@ void execWorker(InputFile* file, int process){
 
     // Proceso padre.
     if (pid > 0){
-        pid_to_kill = pid;
-
         printf("Ejecutando el proceso padre[%d]...\n", own_pid);
+
+        pid_to_kill = pid;
+        printf("Seteando pid_to_kill en %d\n", pid_to_kill);
+
         wait(&status);
 
         /*
@@ -164,7 +166,7 @@ void execManager(InputFile* file, int process){
     const int n = atoi(line[2]);
 
     // Seteamos la variable global del número de hijos.
-    n_childs = n;
+    n_children = n;
 
     pid_array_to_kill = malloc(sizeof(pid_t) * n);
 
@@ -197,14 +199,20 @@ void execManager(InputFile* file, int process){
 
         p = fork();
 
-        // Si el proceso es padre, setear que espere al hijo y continuar.
+        // Si el proceso es padre.
         if (p > 0) {
+            printf("Agregando %d al array de hijos.\n", p);
             pid_array_to_kill[i] = p;
-            
+            continue;
+        }
+
+        /*
+        if (p > 0) {            
             printf("Seteando espera del padre[%d] al hijo[%d]\n", own_pid, p);
             waitpid(p, &status[i], 0);
             continue;
         }
+        */
 
         own_pid = getpid();
         printf("Ejecutando el proceso hijo[%d] con padre[%d]...\n",
@@ -224,10 +232,23 @@ void execManager(InputFile* file, int process){
         }
     }
 
+    // Seteamos espera del padre a los hijos.
+    for (i = 0; i < n; i++){
+        printf(
+            "Seteando espera del padre[%d] al hijo[%d]\n",
+            own_pid, pid_array_to_kill[i]
+        );
+        waitpid(pid_array_to_kill[i], &status[i], 0);
+    }
+
+    
+
     if (p > 0) {
         // Creamos el archivo de output.
         buildManagerOutput(process, child_idxs, n);
         printf("Cerrando el proceso padre[%d].\n\n", own_pid);
+
+        free(pid_array_to_kill);
         exit(0);
     }
 }

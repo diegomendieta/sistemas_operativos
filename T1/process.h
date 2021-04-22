@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/time.h>      // getitimer
+#include <sys/time.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -26,4 +26,4 @@ void execManager(InputFile* file, int process);
 // Variables globales.
 pid_t pid_to_kill;
 pid_t* pid_array_to_kill;
-int n_childs;
+int n_children;

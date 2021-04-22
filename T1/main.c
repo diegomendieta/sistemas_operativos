@@ -1,8 +1,4 @@
-#include <stdio.h>  // FILE, fopen, fclose, etc.
-#include <string.h> // strtok, strcpy, etc.
-#include <stdlib.h> // malloc, calloc, free, etc.
-#include <unistd.h>
-#include <sys/wait.h>
+
 #include "main.h"
 
 /* Main. Echa a andar un crtree. */
@@ -41,8 +37,8 @@ int main(int argc, char** argv){
 
     // Si es parent.
     else {
-        wait(NULL);
-        printf("Destroying file...\n");
+        waitpid(pid, NULL, 0);
+        printf("\nDestroying file...\n");
         input_file_destroy(file);
         return 0;
     }

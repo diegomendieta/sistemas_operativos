@@ -2,9 +2,10 @@
 
 // Maneja la señal SIGABRT en un Worker.
 void workerAbortHandler(){
-    printf("Manejando señal SIGABRT en un proceso Worker.\n");
+    printf("\nManejando señal SIGABRT en un proceso Worker.\n");
     printf("Matando proceso %d...\n", pid_to_kill);
     kill(pid_to_kill, SIGABRT);
+    printf("Proceso %d matado.\n\n", pid_to_kill);
 }
 
 // Setea el manejo de señales para un proceso Worker.
@@ -16,7 +17,7 @@ void setWorkerSignalHandling(){
 
 // Maneja la señal SIGABRT en un Manager.
 void managerAbortHandler(){
-    for (int j = 0; j < n_childs; j++){
+    for (int j = 0; j < n_children; j++){
         kill(pid_array_to_kill[j], SIGABRT);
     }
 }
