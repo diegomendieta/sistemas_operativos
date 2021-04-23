@@ -19,8 +19,6 @@ void buildWorkerOutput(int idx, char* name, char** args, int n_args,
     char* extension = ".txt";
     strcat(path, extension);
 
-    int len;
-
     FILE* file = fopen(path, "w");
     fprintf(file, "%s,", name);
     for (int j = 1; j <= n_args; j++){
@@ -182,9 +180,6 @@ void execManager(InputFile* file, int process){
         child_idxs[i] = atoi(line[3 + i]);
     }
 
-    // Array que almacena las ids de los procesos hijo.
-    pid_t pid_arr[n];
-
     pid_t parent_pid, p, own_pid;
 
     own_pid = getpid();
@@ -205,14 +200,6 @@ void execManager(InputFile* file, int process){
             pid_array_to_kill[i] = p;
             continue;
         }
-
-        /*
-        if (p > 0) {            
-            printf("Seteando espera del padre[%d] al hijo[%d]\n", own_pid, p);
-            waitpid(p, &status[i], 0);
-            continue;
-        }
-        */
 
         own_pid = getpid();
         printf("Ejecutando el proceso hijo[%d] con padre[%d]...\n",
@@ -240,9 +227,7 @@ void execManager(InputFile* file, int process){
         );
         waitpid(pid_array_to_kill[i], &status[i], 0);
     }
-
     
-
     if (p > 0) {
         // Creamos el archivo de output.
         buildManagerOutput(process, child_idxs, n);

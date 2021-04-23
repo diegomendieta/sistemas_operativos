@@ -1,4 +1,3 @@
-
 #include "main.h"
 
 /* Main. Echa a andar un crtree. */
@@ -38,7 +37,7 @@ int main(int argc, char** argv){
     // Si es parent.
     else {
         waitpid(pid, NULL, 0);
-        printf("\nDestroying file...\n");
+        printf("Destroying file...\n");
         input_file_destroy(file);
         return 0;
     }
