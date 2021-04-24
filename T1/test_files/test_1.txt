@@ -1,0 +1,6 @@
+5
+R,100,2,1,2
+M,100,1,3
+M,100,1,4
+W,./test_files/binarios/hello_world,0
+W,./test_files/binarios/goodbye_world,0
