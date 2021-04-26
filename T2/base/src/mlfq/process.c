@@ -77,18 +77,27 @@ void execute_process(Process* process, int total_program_time)
 
 int process_wait(Process* process)
 {
-    process -> cycles_waiting = process -> cycles_waiting + 1;
-    if (process -> cycles_waiting == process -> waiting_delay)
+    if (process -> state == 2)
     {
-        process -> state = 1;
-        process -> waiting_time = process -> waiting_time + process -> cycles_waiting;
-        process -> cycles_waiting = 0;
-        return 1;
+        process -> cycles_waiting = process -> cycles_waiting + 1;
+        if (process -> cycles_waiting == process -> waiting_delay)
+        {
+            process -> state = 1;
+            process -> waiting_time = process -> waiting_time + process -> cycles_waiting;
+            process -> cycles_waiting = 0;
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
     }
-    else
+    else if (process -> state == 1)
     {
+        process -> waiting_time++;
         return 0;
     }
+    else return 0;
 }
 
 void output_process(Process* process, FILE* output_file)
@@ -98,5 +107,6 @@ void output_process(Process* process, FILE* output_file)
 
 void process_destroy(Process* process)
 {
+    free(process -> name);
     free(process);
 }

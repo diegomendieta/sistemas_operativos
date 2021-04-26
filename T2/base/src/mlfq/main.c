@@ -57,10 +57,10 @@ int main(int argc, char **argv)
   {
     system_queues[i] = queue_init(n_queues, program_input, i);
   }
-
   for (int i = 0; i < n_processes; i++)
   {
-    char nombre_proceso[32];
+    char* nombre_proceso;
+    nombre_proceso = (char *)malloc(sizeof(char)*32);
     int pid;
     int tiempo_inicio;
     int cycles;
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
       }
       for (int id_p = 0; id_p < n_processes; id_p++)
       {
-        if (system_processes[id_p] -> state == 2)
+        if (system_processes[id_p] -> state == 2 || system_processes[id_p] -> state == 1)
         {
           int finishes_wait = process_wait(system_processes[id_p]);
           if (finishes_wait == 1)
@@ -183,6 +183,7 @@ int main(int argc, char **argv)
     }
     program_time_to_s = 0;
   }
+
   for (int id_p = 0; id_p < n_processes; id_p++){
     printf("\nprocess -> name: %s | process -> PID: %i", system_processes[id_p] -> name, system_processes[id_p] -> PID);
     output_process(system_processes[id_p], output_file);
