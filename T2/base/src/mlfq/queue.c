@@ -20,12 +20,10 @@ void add_process(Queue* queue, Process* process)
 {
     if (queue -> head == NULL && queue -> tail == NULL)
     {
-        process -> prev = NULL;
         queue -> head = process;
     }
     else
     {
-        process -> prev = queue -> tail;
         queue -> tail -> next = process;
     }
     process -> cycles_for_wait = 0;
@@ -36,19 +34,14 @@ void add_process(Queue* queue, Process* process)
     queue -> tail = process;
 }
 
-int execute_next_process(Queue* queue)
+int execute_next_process(Queue* queue, int total_program_time)
 {
-    printf("\nqueue -> priority: %i", queue -> priority);
-    execute_process(queue -> head);
+    execute_process(queue -> head, total_program_time);
     Process* head_process = queue -> head;
     if (head_process -> state == 3)
     {
         queue -> head = head_process -> next;
-        if (queue -> head != NULL)
-        {
-            queue -> head -> prev = NULL;
-        }
-        else
+        if (queue -> head == NULL)
         {
             queue -> tail = NULL;
         }
@@ -57,11 +50,7 @@ int execute_next_process(Queue* queue)
     else if (head_process -> state == 2)
     {
         queue -> head = head_process -> next;
-        if (queue -> head != NULL)
-        {
-            queue -> head -> prev = NULL;
-        }
-        else
+        if (queue -> head == NULL)
         {
             queue -> tail = NULL;
         }
@@ -70,11 +59,7 @@ int execute_next_process(Queue* queue)
     else if (head_process -> state == 1)
     {
         queue -> head = head_process -> next;
-        if (queue -> head != NULL)
-        {
-            queue -> head -> prev = NULL;
-        }
-        else
+        if (queue -> head == NULL)
         {
             queue -> tail = NULL;
         }

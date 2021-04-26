@@ -57,10 +57,10 @@ int main(int argc, char **argv)
   {
     system_queues[i] = queue_init(n_queues, program_input, i);
   }
-
   for (int i = 0; i < n_processes; i++)
   {
-    char nombre_proceso[32];
+    char* nombre_proceso;
+    nombre_proceso = (char *)malloc(sizeof(char)*32);
     int pid;
     int tiempo_inicio;
     int cycles;
@@ -73,18 +73,28 @@ int main(int argc, char **argv)
     fscanf(input_file, "%d", &cycles);
     fscanf(input_file, "%d", &wait);
     fscanf(input_file, "%d", &waiting_delay);
+    
 
+    printf("\nnombre_proceso: %s", nombre_proceso);
     Process* process = process_init(pid, nombre_proceso, tiempo_inicio, cycles, wait, waiting_delay);
+    printf("\nprocess -> name: %s", process -> name);
     system_processes[i] = process;
+    printf("\nprocess -> name: %s", system_processes[i] -> name);
+    printf("\nprocess -> PID: %i | process: %p", process -> PID, process);
+    printf("\nnombre_proceso: %s", nombre_proceso);
+  }
+
+  for (int id_p = 0; id_p < n_processes; id_p++)
+  {
+    printf("\n5process -> name: %s | process -> PID: %i", system_processes[id_p] -> name, system_processes[id_p] -> PID);
   }
 
   printf("\nn_finished_processes: %i", n_finished_processes);
   while (n_finished_processes < n_processes)
   {
-    printf("\nprogram_time_to_s: %i", program_time_to_s);
+    printf("\nSE RENUEVA TIEMPO S");
     while (program_time_to_s < program_time_s)
     {
-      printf("\nn_finished_processes: %i", n_finished_processes);
       Queue* queue;
       for (int id_q = 0; id_q < n_queues; id_q++)
       {
@@ -93,19 +103,24 @@ int main(int argc, char **argv)
           queue = system_queues[id_q];
         }
       }
-      Process* process;
+      
       for (int id_p = 0; id_p < n_processes; id_p++)
       {
         if (system_processes[id_p] -> tiempo_inicio == total_program_time)
         {
-          process = system_processes[id_p];
+          printf("\n5process -> name: %s | process -> PID: %i", system_processes[id_p] -> name, system_processes[id_p] -> PID);
+          Process* process = system_processes[id_p];
+          printf("\n6process -> name: %s", process -> name);
           add_process(queue, process);
+          printf("\n7process -> name: %s", process -> name);
         }
       }
       Queue* actual_queue = NULL;
       for (int id_q = 0; id_q < n_queues; id_q++)
       {
-        if (system_queues[id_q] -> head != NULL && system_queues[id_q] -> tail != NULL)
+        printf("\nsystem_queues[id_q] -> priority: %i | system_queues[id_q] -> head: %p", system_queues[id_q] -> priority, system_queues[id_q] -> head);
+        printf("\nsystem_queues[id_q] -> priority: %i | system_queues[id_q] -> tail: %p", system_queues[id_q] -> priority, system_queues[id_q] -> tail);
+        if (system_queues[id_q] -> head != NULL)
         {
           actual_queue = system_queues[id_q];
           break;
@@ -115,10 +130,11 @@ int main(int argc, char **argv)
       if (actual_queue != NULL)
       {
         Process* process_tobe_executed = actual_queue -> head;
-        int result_execution = execute_next_process(actual_queue);
+        int result_execution = execute_next_process(actual_queue, total_program_time);
 
         if (result_execution == 3)
         {
+          printf("\nPROCESS FINISHED");
           n_finished_processes = n_finished_processes + 1;
         }
         else if (result_execution == 1)
@@ -129,13 +145,14 @@ int main(int argc, char **argv)
             if (system_queues[id_q] -> priority == new_priority)
             {
               add_process(system_queues[id_q], process_tobe_executed);
+              printf("\nprocess -> name: %s | process -> PID: %i | process -> priority: %i", process_tobe_executed -> name, process_tobe_executed -> PID, process_tobe_executed -> priority);
             }
           }
         }
       }
       for (int id_p = 0; id_p < n_processes; id_p++)
       {
-        if (system_processes[id_p] -> state == 2)
+        if (system_processes[id_p] -> state == 2 || system_processes[id_p] -> state == 1)
         {
           int finishes_wait = process_wait(system_processes[id_p]);
           if (finishes_wait == 1)
@@ -162,13 +179,13 @@ int main(int argc, char **argv)
         Process* new_head = queue -> head -> next;
         add_process(system_queues[0], queue -> head);
         queue -> head = new_head;
-        queue -> head -> prev = NULL;
       }
-      queue -> tail = NULL;
     }
     program_time_to_s = 0;
   }
+
   for (int id_p = 0; id_p < n_processes; id_p++){
+    printf("\nprocess -> name: %s | process -> PID: %i", system_processes[id_p] -> name, system_processes[id_p] -> PID);
     output_process(system_processes[id_p], output_file);
   }
   for (int id_p = 0; id_p < n_processes; id_p++){
