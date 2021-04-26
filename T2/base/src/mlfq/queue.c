@@ -11,6 +11,7 @@ Queue* queue_init(int system_queues, int program_input, int priority)
     queue -> program_input = program_input;
     queue -> priority = priority;
     queue -> quantum = (queue -> system_queues - queue -> priority) * queue -> program_input;
+    printf("\nQUEUE priority: %i | quantum: %i", queue -> priority, queue -> quantum);
     queue -> head = NULL;
     queue -> tail = NULL;
     return queue;
@@ -18,6 +19,7 @@ Queue* queue_init(int system_queues, int program_input, int priority)
 
 void add_process(Queue* queue, Process* process)
 {
+    process -> state = 1;
     if (queue -> head == NULL && queue -> tail == NULL)
     {
         queue -> head = process;
@@ -30,6 +32,39 @@ void add_process(Queue* queue, Process* process)
     process -> cycles_waiting = 0;
     process -> next = NULL;
     process -> quantum = queue -> quantum;
+    process -> priority = queue -> priority;
+    queue -> tail = process;
+}
+
+void add_process_afterwait(Queue* queue, Process* process)
+{
+    process -> state = 1;
+    if (queue -> head == NULL && queue -> tail == NULL)
+    {
+        queue -> head = process;
+    }
+    else
+    {
+        queue -> tail -> next = process;
+    }
+    process -> next = NULL;
+    process -> priority = queue -> priority;
+    queue -> tail = process;
+}
+
+void add_process_afterquantum(Queue* queue, Process* process)
+{
+    process -> state = 1;
+    if (queue -> head == NULL && queue -> tail == NULL)
+    {
+        queue -> head = process;
+    }
+    else
+    {
+        queue -> tail -> next = process;
+    }
+    process -> quantum = queue -> quantum;
+    process -> next = NULL;
     process -> priority = queue -> priority;
     queue -> tail = process;
 }

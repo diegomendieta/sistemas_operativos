@@ -20,7 +20,7 @@ Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wa
 
     /* atributos variables según estado y ubicación de proceso */
     process -> priority = 0;
-    process -> state = 1;
+    process -> state = NULL;
 
     /* punteros hacia procesos previo y siguiente en cola */
     process -> next = NULL;
@@ -42,10 +42,12 @@ Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wa
 
 void execute_process(Process* process, int total_program_time)
 {
+    printf("\nejecutando proceso: %s", process -> name);
+    printf("\nprocess_%i -> quantum: %i", process -> PID, process -> quantum);
+    printf("\nprocess -> PID: %i | cycles_for_wait: %i | wait: %i | quantum: %i | total_cycles: %i | cycles needed: %i", process -> PID, process -> cycles_for_wait, process -> wait, process -> quantum, process -> total_cycles, process -> cycles);
     if (process -> state == 1)
     {
-        printf("\nprocess -> priority: %i", process -> priority);
-        process -> response_time = total_program_time - process -> tiempo_inicio;
+        if (process -> turnos_cpu == 0) process -> response_time = total_program_time - process -> tiempo_inicio;
         process -> state = 0;
         process -> turnos_cpu = process -> turnos_cpu + 1;
     }
@@ -54,23 +56,20 @@ void execute_process(Process* process, int total_program_time)
     process -> quantum = process -> quantum - 1;
     if (process -> total_cycles == process -> cycles)
     {
-        printf("\nprocess_%i -> quantum: %i", process -> PID, process -> quantum);
-        printf("\nprocess_%i -> total_cycles: %i", process -> PID, process -> total_cycles);
+        if (process -> cycles_for_wait == process -> wait && process -> wait != 0) (process -> n_interruptions)++;
+        if (process -> quantum == 0) (process -> n_interruptions)++;
         process -> state = 3;
-        process -> turnaround_time = total_program_time - process -> tiempo_inicio;
+        process -> turnaround_time = total_program_time - process -> tiempo_inicio + 1;
     }
     else if (process -> cycles_for_wait == process -> wait && process -> wait != 0)
     {
-        printf("\nprocess_%i -> quantum: %i", process -> PID, process -> quantum);
-        printf("\nprocess_%i -> total_cycles: %i", process -> PID, process -> total_cycles);
         (process -> n_interruptions)++;
         process -> cycles_for_wait = 0;
         process -> state = 2;
     }
     else if (process -> quantum == 0)
     {
-        printf("\nprocess_%i -> quantum: %i", process -> PID, process -> quantum);
-        printf("\nprocess_%i -> total_cycles: %i", process -> PID, process -> total_cycles);
+        (process -> n_interruptions)++;
         process -> state = 1;
     }
 }
