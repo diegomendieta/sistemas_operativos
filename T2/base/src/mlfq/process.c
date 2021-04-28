@@ -43,7 +43,6 @@ Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wa
 void execute_process(Process* process, int total_program_time)
 {
     printf("\nejecutando proceso: %s", process -> name);
-    printf("\nprocess_%i -> quantum: %i", process -> PID, process -> quantum);
     printf("\nprocess -> PID: %i | cycles_for_wait: %i | wait: %i | quantum: %i | total_cycles: %i | cycles needed: %i", process -> PID, process -> cycles_for_wait, process -> wait, process -> quantum, process -> total_cycles, process -> cycles);
 
     /* Si proceso pasa de estado READY a RUNNING */

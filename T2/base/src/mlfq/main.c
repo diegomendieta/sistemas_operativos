@@ -126,7 +126,7 @@ int main(int argc, char **argv)
       /* Todos aquellos procesos cuyo t de inicio (proceso -> tiempo_inicio) sea igual al t actual (total_program_time) se añaden a la cola de mayor prioridad */
       for (int id_p = 0; id_p < n_processes; id_p++)
       {
-        if (system_processes[id_p] -> tiempo_inicio == total_program_time)
+        if (system_processes[id_p] -> tiempo_inicio == total_program_time && system_processes[id_p] -> state == -1)
         {
           Process* process = system_processes[id_p];
           add_process(queue, process);
@@ -231,9 +231,9 @@ int main(int argc, char **argv)
         }
       }
       else process_tobe_executed = fake_process;
+      printf("\n");
       for (int id_q = 0; id_q < n_queues; id_q++)
       {
-        printf("\n");
         printf("\nQUEUE -> PRIORITY: %i", system_queues[id_q] -> priority);
         if (system_queues[id_q] -> head != NULL) queue_print(system_queues[id_q] -> head);
       }
@@ -254,7 +254,6 @@ int main(int argc, char **argv)
         {
           int finishes_wait = -1;
           if (system_processes[id_p] != process_tobe_executed) finishes_wait = process_wait(system_processes[id_p]);
-          printf("\n%s tiene estado de wait: %i", system_processes[id_p] -> name, finishes_wait);
           /* Si el valor de retorno de process_wait es = 1, sabemos que el proceso culminó su etapa de WAIT y pasa a estar READY */
           if (finishes_wait == 1)
           {
@@ -272,6 +271,7 @@ int main(int argc, char **argv)
     }
 
     /* Revisamos todas las queues pasando todos sus procesos a la queue de prioridad más alta */
+    
     Queue* queue;
     for (int id_q = 1; id_q < n_queues; id_q++)
     {
