@@ -13,7 +13,11 @@ Queue* queue_init(int system_queues, int program_input, int priority)
 
     /* Calculo de quantum según fórmula */
     queue -> quantum = (queue -> system_queues - queue -> priority) * queue -> program_input;
-    printf("\nQUEUE priority: %i | quantum: %i", queue -> priority, queue -> quantum);
+    printf(
+        "\nQUEUE priority: %i | quantum: %i",
+        queue -> priority,
+        queue -> quantum
+    );
     queue -> head = NULL;
     queue -> tail = NULL;
     return queue;
@@ -57,7 +61,8 @@ void add_process_afterwait(Queue* queue, Process* process)
 
 void add_process_afterquantum(Queue* queue, Process* process)
 {
-    /* Se comporta igual que el add process, pero no renueva el tiempo hasta tener que pasar a estado WAIT */
+    /* Se comporta igual que el add process, pero no renueva el tiempo hasta
+    tener que pasar a estado WAIT */
     process -> state = 1;
     if (queue -> head == NULL && queue -> tail == NULL)
     {
@@ -174,6 +179,7 @@ int execute_next_process(Queue* queue, int total_program_time)
             return 0;
         }
     }
+    
     /*execute_process(queue -> head, total_program_time);
     Process* head_process = queue -> head;
     if (head_process -> state == 3)

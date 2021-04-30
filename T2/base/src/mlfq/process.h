@@ -21,9 +21,15 @@ typedef struct process {
     int waiting_time;
 } Process;
 
-Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wait, int waiting_delay);
+Process* process_init(int PID, char* name, int tiempo_inicio, int cycles,
+                      int wait, int waiting_delay);
+
 void execute_process(Process* process, int total_program_time);
+
 void output_process(Process* process, FILE* output_file);
+
 int process_wait(Process* process);
+
 void queue_print(Process* process);
+
 void process_destroy(Process* process);

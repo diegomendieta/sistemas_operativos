@@ -4,7 +4,8 @@
 
 #include "process.h"
 
-Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wait, int waiting_delay)
+Process* process_init(int PID, char* name, int tiempo_inicio, int cycles,
+                      int wait, int waiting_delay)
 {
     /* initial memory allocation */
     Process* process = calloc(1, sizeof(Process));
@@ -43,12 +44,21 @@ Process* process_init(int PID, char* name, int tiempo_inicio, int cycles, int wa
 void execute_process(Process* process, int total_program_time)
 {
     printf("\nejecutando proceso: %s", process -> name);
-    printf("\nprocess -> PID: %i | cycles_for_wait: %i | wait: %i | quantum: %i | total_cycles: %i | cycles needed: %i", process -> PID, process -> cycles_for_wait, process -> wait, process -> quantum, process -> total_cycles, process -> cycles);
+    printf(
+        "\nprocess -> PID: %i | cycles_for_wait: %i | wait: %i | quantum: %i | total_cycles: %i | cycles needed: %i",
+        process -> PID,
+        process -> cycles_for_wait,
+        process -> wait, process -> quantum,
+        process -> total_cycles,
+        process -> cycles
+    );
 
     /* Si proceso pasa de estado READY a RUNNING */
     if (process -> state == 1)
     {
-        if (process -> turnos_cpu == 0) process -> response_time = total_program_time - process -> tiempo_inicio;
+        if (process -> turnos_cpu == 0) 
+            process -> response_time = total_program_time - process -> tiempo_inicio;
+        
         process -> state = 0;
         process -> turnos_cpu = process -> turnos_cpu + 1;
     }
@@ -60,6 +70,7 @@ void execute_process(Process* process, int total_program_time)
     if (process -> total_cycles == process -> cycles)
     {
         if (process -> quantum == 0) (process -> n_interruptions)++;
+
         process -> state = 3;
         process -> turnaround_time = total_program_time - process -> tiempo_inicio + 1;
     }
@@ -111,7 +122,16 @@ int process_wait(Process* process)
 
 void output_process(Process* process, FILE* output_file)
 {
-    fprintf(output_file, "%s,%i,%i,%i,%i,%i\n", process -> name, process -> turnos_cpu, process -> n_interruptions, process -> turnaround_time, process -> response_time, process -> waiting_time);
+    fprintf(
+        output_file,
+        "%s,%i,%i,%i,%i,%i\n",
+        process -> name,
+        process -> turnos_cpu,
+        process -> n_interruptions,
+        process -> turnaround_time,
+        process -> response_time,
+        process -> waiting_time
+    );
 }
 
 void queue_print(Process* process)
