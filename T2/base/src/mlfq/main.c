@@ -150,6 +150,8 @@ int main(int argc, char **argv)
       su interior en estado READY.
       Así, sabemos que en el t actual, este proceso será el dueño de la CPU */
       Queue* actual_queue = NULL;
+      Process* process_tobe_executed;
+
       for (int id_q = 0; id_q < n_queues; id_q++)
       {
         printf(
@@ -168,8 +170,9 @@ int main(int argc, char **argv)
           );
         }
         if ((system_queues[id_q] -> head != NULL) && 
-            (choose_queue(system_queues[id_q]) != NULL))
+            (choose_queue(system_queues[id_q], 1) != NULL))
         {
+          process_tobe_executed = choose_queue(system_queues[id_q], 1);
           actual_queue = system_queues[id_q];
           break;
         }
@@ -182,30 +185,23 @@ int main(int argc, char **argv)
       dejando sin efecto lo hecho en el paso anterior */
       for (int id_q = 0; id_q < n_queues; id_q++)
       {
-        if (system_queues[id_q] -> head != NULL)
+        if ((system_queues[id_q] -> head != NULL) && 
+            (choose_queue(system_queues[id_q], 0) != NULL))
         {
-          if (system_queues[id_q] -> head -> state == 0)
-          {
-            actual_queue = system_queues[id_q];
-            break;
-          }
+          process_tobe_executed = choose_queue(system_queues[id_q], 0);
+          actual_queue = system_queues[id_q];
+          break;
         }
       }
       
       /* Ejecutamos el proceso que se encontraba en primer lugar de la cola
       previamente seleccionada
       (proceso encontrado o que ya estaba corriendo) */
-      Process* process_tobe_executed;
       Process* fake_process = process_init(-1, "fake_process", -1, 0, 0, 0);
       if (actual_queue != NULL)
       {
-        process_tobe_executed = actual_queue -> head;
-        while (process_tobe_executed -> state == 2)
-        {
-          process_tobe_executed = process_tobe_executed -> next;
-        }
         int result_execution = execute_next_process(
-                                   actual_queue, total_program_time);
+                                   actual_queue, process_tobe_executed, total_program_time);
 
         /* Obtenemos el resultado de la ejecución del proceso, donde pasa
         solamente una unidad de tiempo */

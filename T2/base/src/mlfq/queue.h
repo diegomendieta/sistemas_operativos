@@ -21,8 +21,8 @@ void add_process_afterquantum(Queue* queue, Process* process);
 
 void add_waiting_process(Queue* queue, Process* process);
 
-Process* choose_queue(Queue* queue);
+Process* choose_queue(Queue* queue, int search_state);
 
-int execute_next_process(Queue* queue, int total_program_time);
+int execute_next_process(Queue* queue, Process* process_chosen, int total_program_time);
 
 void queue_destroy(Queue* queue);

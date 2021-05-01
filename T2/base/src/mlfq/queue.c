@@ -95,12 +95,12 @@ void add_waiting_process(Queue* queue, Process* process)
     queue -> tail = process;
 }
 
-Process* choose_queue(Queue* queue)
+Process* choose_queue(Queue* queue, int search_state)
 {
     Process* current_process = queue -> head;
     while (current_process != NULL)
     {
-        if (current_process -> state == 1)
+        if (current_process -> state == search_state)
         {
             return current_process;
         }
@@ -109,11 +109,11 @@ Process* choose_queue(Queue* queue)
     return NULL;
 }
 
-int execute_next_process(Queue* queue, int total_program_time)
+int execute_next_process(Queue* queue, Process* process_chosen, int total_program_time)
 {
     Process* executing_process = queue -> head;
-    Process* previous_process = queue -> head;
-    while (executing_process -> state == 2)
+    Process* previous_process;
+    while (executing_process != process_chosen)
     {
         previous_process = executing_process;
         executing_process = executing_process -> next;
